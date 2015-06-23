@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+       <head>
+         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+               <meta charset="utf-8">
+               <title>test</title>
+               
+               <style>
+
+               body{
+                background-color: #dbc56d;
+               }
+
+               .boxes{
+                width: 150px;
+                height: 150px;
+                border-style: solid;
+                background-color: gray;
+                font-size: 2em;
+                
+               
+
+               }
+              #dealer {
+                margin: auto;
+                text-align: center;
+              }
+
+              #player1 {
+                display: inline-block;
+              }
+              #player2 {
+                display: inline-block;
+              }
+              #players {
+                width: 100%;
+                height: 305px;
+                
+                margin: 0 auto;
+                overflow: hidden;
+                text-align: center;
+                margin-top:70px;
+              }
+
+              #content {
+                width: 100%;
+                margin: auto;
+              }
+
+              button {
+              display: block;
+               margin: 0 auto;
+             }
+
+             #table {
+              width:800px;
+              height:470px;
+              background-image: url("table.png");
+              margin: auto;
+             }
+
+                       
+
+               </style>
+               
+       </head>
+       <body>
+
+
+       <div id="table">
+         <div class="boxes" id="dealer">
+          </div>
+          
+
+        <div  id="players">
+          
+          <div class="boxes" id="player1">
+ 
+          </div>
+
+       <button onClick="player.player1Go()">Hit</button>
+       <button onClick="dealer.dealerGo()">Stay</button>
+       <button id="newGame" onClick="deck.newGame()">New Game</button>
+        
+      </div>
+    </div>
+
+     
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+               <script>
+
+
+
+                var Deck = function() {
+
+                var deck = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11];
+
+                var imageDeck = [];
+
+                this.pickCard = function()
+                {
+                 return deck.pop();
+                }
+
+                this.shuffle = function()
+                {
+
+                  for(var j, x, i = deck.length; i; j = Math.floor(Math.random() * i), x = deck[--                          i], deck[i] = deck[j], deck[j] = x);
+                            
+                }
+                
+                this.getDeck = function(){
+                  return deck;
+                }
+
+                 this.newGame = function() {
+                location.reload();
+               }
+
+
+             }
+
+
+
+              var Players = function(deck) {
+
+                var player1 = deck.pickCard() + deck.pickCard();
+               
+               
+                this.checkBlackJack = function() {
+                  if(player1 === 21)
+                  {
+                    
+                    $('#player1').html(player1 + "<br>Player1 has blackjack! You win"); 
+                    return;
+                  }
+
+
+
+                  
+                }
+                
+
+                this.player1Go = function() {
+                  player1 += deck.pickCard();
+
+                  if(player1 > 21)
+                  {
+                    $('#player1').html("Player1 went over 21, Dealer wins");
+                    return;
+
+                  }
+
+                  $('#player1').html(player1);
+                }
+
+                  this.getPlayer1 = function() {
+                    return player1;
+                  }
+                }
+
+              
+
+
+
+
+              var Dealer = function(deck, player) {
+                var dealer = deck.pickCard();;
+
+                this.dealerGo = function(){
+
+                  while((dealer < player.getPlayer1()) && (dealer <= 21) )
+                  {
+                    dealer += deck.pickCard();
+                    $('#dealer').html(dealer);
+
+                    if(dealer > 21)
+                    {
+                      $('#dealer').html("Dealer went over 21, player wins");
+                      return;
+                    }
+                   if(dealer === player.getPlayer1())
+                    {
+                      $('#dealer').html("Dealer has " + dealer + "<br>It's a tie!"); 
+                      return;
+                    }
+
+                  }
+
+                  $('#dealer').html("Dealer Wins with " + dealer);
+
+                }
+
+                this.getDealer = function() {
+                  return dealer;
+                }
+              }
+
+              var deck = new Deck();
+              deck.shuffle();
+              var player = new Players(deck);
+             
+              var dealer = new Dealer(deck, player);
+
+              document.getElementById('dealer').innerHTML=dealer.getDealer();
+               document.getElementById('player1').innerHTML=player.getPlayer1();
+               player.checkBlackJack();
+
+
+            
+
+
+
+               </script>
+       </body>
+</html>
+ 
