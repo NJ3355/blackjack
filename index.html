@@ -143,6 +143,10 @@
               var Players = function(deck) {
 
                 var player1 = deck.pickCard() + deck.pickCard();
+                if(player1 === 22)
+                {
+                  player1 = 13;
+                }
                
                
                 this.checkBlackJack = function() {
