@@ -54,12 +54,33 @@
 
              #table {
               width:800px;
-              height:470px;
+              height:500px;
               background-image: url("table.png");
               margin: auto;
+              position: relative;
              }
 
-                       
+             #start {
+              position: absolute;
+              left: 0;
+              bottom: 0;
+             }
+
+             #newGame {
+              position: absolute;
+              right: 0;
+              bottom: 0;
+             }
+              
+            #playersMoney {
+              text-align: center;
+              position: absolute;
+              
+              
+              width:100px;
+              height:100px;
+              background-color: white;
+            }
 
                </style>
                
@@ -68,6 +89,12 @@
 
 
        <div id="table">
+         <div id="playersMoney">
+          <h4>Money</h4>
+          <p id="money"></p>
+
+         </div>
+
          <div class="boxes" id="dealer">
           </div>
           
@@ -79,8 +106,13 @@
           </div>
 
        <button onClick="player.player1Go()">Hit</button>
-       <button onClick="dealer.dealerGo()">Stay</button>
-       <button id="newGame" onClick="deck.newGame()">New Game</button>
+       <button onClick="dealer1.dealerGo()">Stay</button>
+       
+      <input type="text" id="bet"><button id="betButton" onClick="chips.placeBet()">Place Bet</button>
+       <button id="newGame" onClick="player.newGame();dealer1.newGame()">New Game</button>
+        <button id="start" onClick="player.startPlayer();dealer1.startDealer()">Start</button>
+
+
         
       </div>
     </div>
@@ -123,7 +155,7 @@
                 this.shuffle = function()
                 {
 
-                  for(var j, x, i = deck.length; i; j = Math.floor(Math.random() * i), x = deck[--                          i], deck[i] = deck[j], deck[j] = x);
+                  for(var j, x, i = deck.length; i; j = Math.floor(Math.random() * i), x = deck[--i], deck[i] = deck[j], deck[j] = x);
                             
                 }
                 
@@ -140,20 +172,34 @@
 
 
 
-              var Players = function(deck) {
+              var Players = function(deck, chips) {
+                var cash = 100;
+                var player1 = 0;
+                
 
-                var player1 = deck.pickCard() + deck.pickCard();
-                if(player1 === 22)
-                {
-                  player1 = 13;
+                this.startPlayer = function(){
+                   start.disabled = true;
+                   player1 = deck.pickCard() + deck.pickCard();
+
+                  if(player1 === 22)
+                  {
+                   player1 = 12;
+                  }
+                  
+                  player.updatePlayer();
+                  player.checkBlackJack();
+
+                
                 }
-               
+
+                
                
                 this.checkBlackJack = function() {
                   if(player1 === 21)
                   {
                     
                     $('#player1').html(player1 + "<br>Player1 has blackjack! You win"); 
+                    chips.blackjack();
                     return;
                   }
 
@@ -164,11 +210,22 @@
                 
 
                 this.player1Go = function() {
-                  player1 += deck.pickCard();
+                  var current = deck.pickCard();
+                 
+                  if(current === 11 && current + player1 <= 21)
+                  {
+                    player1 += current;
+                  }
+                  else if (current === 11 && current + player1 > 21){
+                    player1 += 1;
+                  }
+                  else 
+                    player1 += current;
 
                   if(player1 > 21)
                   {
                     $('#player1').html("Player1 went over 21, Dealer wins");
+                    chips.lose();
                     return;
 
                   }
@@ -179,26 +236,62 @@
                   this.getPlayer1 = function() {
                     return player1;
                   }
+
+
+                this.updatePlayer = function(){
+                  document.getElementById('player1').innerHTML=player.getPlayer1();
                 }
+
+                this.newGame = function(){
+                  player1 = 0;
+                  player.updatePlayer();
+                  start.disabled = false;
+
+                }
+          }
 
               
 
 
 
 
-              var Dealer = function(deck, player) {
-                var dealer = deck.pickCard();;
+              var Dealer = function(deck, player, chips) {
+                var dealer = 0;
 
+                this.startDealer = function(){
+                  dealer = deck.pickCard();
+                  dealer1.updateDealer();
+                   //document.getElementById('dealer').innerHTML=dealer1.getDealer();
+                   console.log(dealer);
+
+                }
+                
                 this.dealerGo = function(){
 
+                  
                   while((dealer < player.getPlayer1()) && (dealer <= 21) )
                   {
-                    dealer += deck.pickCard();
-                    $('#dealer').html(dealer);
+                   // dealer += deck.pickCard();
+                   // $('#dealer').html(dealer);
+                   var current = deck.pickCard();
+                  console.log(current);
 
+                   
+                   if(current === 11 && current + dealer <= 21)
+                  {
+                    dealer += current;
+                  }
+                  else if (current === 11 && current + dealer > 21){
+                    dealer += 1;
+                  }
+                  else 
+                    dealer += current;
+
+                dealer1.updateDealer();
                     if(dealer > 21)
                     {
                       $('#dealer').html("Dealer went over 21, player wins");
+                      chips.win();
                       return;
                     }
                    if(dealer === player.getPlayer1())
@@ -210,24 +303,80 @@
                   }
 
                   $('#dealer').html("Dealer Wins with " + dealer);
+                  chips.lose();
 
                 }
 
                 this.getDealer = function() {
                   return dealer;
                 }
+
+                this.updateDealer = function(){
+                  document.getElementById('dealer').innerHTML=dealer1.getDealer();
+                }
+
+                this.newGame = function(){
+                  dealer = 0;
+                  dealer1.updateDealer();
+                  start.disabled = false;
+
+                }
               }
 
+
+            var Chips = function(player){
+              var total = 100;
+              var currentBet = 0;
+              document.getElementById('money').innerHTML=total;
+
+
+              this.placeBet = function(){
+
+                currentBet = Number(document.getElementById('bet').value);
+                if(currentBet > total)
+                {
+                  alert("You can't bet more than you have!");
+                  return;
+                }
+                console.log(currentBet);
+
+              }
+
+              this.win = function(){
+
+                total += currentBet;
+                document.getElementById('money').innerHTML=total;
+              }
+
+
+              this.lose = function(){
+
+                total -= currentBet;
+                document.getElementById('money').innerHTML=total;
+              }
+
+              this.blackjack = function(){
+                total += currentBet * 2;
+                document.getElementById('money').innerHTML=total;
+              }
+
+
+
+            }
+              start.disabled = false;
               var deck = new Deck();
+              var chips = new Chips(player);
               deck.shuffle();
-              var player = new Players(deck);
-             
-              var dealer = new Dealer(deck, player);
+              var player = new Players(deck, chips);
+              var dealer1 = new Dealer(deck, player, chips);
+              
 
-              document.getElementById('dealer').innerHTML=dealer.getDealer();
-               document.getElementById('player1').innerHTML=player.getPlayer1();
-               player.checkBlackJack();
 
+              //document.getElementById('dealer').innerHTML=dealer1.getDealer();
+             // document.getElementById('player1').innerHTML=player.getPlayer1();
+              //player.checkBlackJack();
+
+  
 
             
 
